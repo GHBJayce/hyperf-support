@@ -89,15 +89,32 @@ class Composer
         return $path;
     }
 
+    /**
+     * 从composer.lock中收集所有包中extra的指定属性的数据
+     * @param string|null $key
+     * @return array
+     */
     public static function getMergedExtra(string $key = null)
     {
         if (! self::$extra) {
+            // 搜集composer.lock数据：composer.lock自身数据、所有包的extra、所有包的version、所有包的scripts
             self::getLockContent();
         }
         if ($key === null) {
             return self::$extra;
         }
         $extra = [];
+        /**
+         * $project包名称，例如：hyperf/di
+         * $config包的extra数据，例如：[
+         *  'branch-alias' => [
+         *      'dev-master' => '3.0-dev'
+         *  ],
+         *  'hyperf' => [
+         *      'config' => 'Hyperf\\Di\\ConfigProvider'
+         *  ]
+         * ]
+         */
         foreach (self::$extra as $project => $config) {
             foreach ($config ?? [] as $configKey => $item) {
                 if ($key === $configKey && $item) {
